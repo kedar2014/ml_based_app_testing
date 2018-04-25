@@ -1,9 +1,6 @@
 import tensorflow as tf
 
 
-
-
-
 def cnn_layer_set(input,cnn_name_space,filter):
 
    

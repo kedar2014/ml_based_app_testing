@@ -22,7 +22,7 @@ util_obj = ut.Utilities()
 
 
 # Model Hyper parameters
-lr_rate = 0.005
+lr_rate = 0.001
 decay_rate = 0.01
 num_epochs=5000
 
@@ -71,6 +71,10 @@ print_op = tf.Print(labels,[labels])
 
 #first set of CNN -> RELU -> MAX Pool -> Norm
 cnn_set_1 = model.cnn_layer_set(images,'CNN_Layer_Set1',[3,3,3,32])
+
+#get the weights of first conv layer and put them on the tensorboard
+with tf.variable_scope('CNN_Layer_Set1/variables'):
+    filter = tf.get_variable(name='weights',shape=filter,initializer=tf.truncated_normal_initializer())
 
 #Second set of CNN -> RELU -> MAX Pool -> Norm
 cnn_set_2 = model.cnn_layer_set(cnn_set_1,'CNN_Layer_Set2',[3,3,32,64])
