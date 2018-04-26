@@ -238,19 +238,3 @@ class Screen:
         im = Image.open(BytesIO(png)) # uses PIL library to open image in memory
         im = im.crop((left, top, (3*right), (3*bottom))) # defines crop points
         im.save('screenshot.png') # saves new cropped image
-#         element = fox.find_element_by_id('hlogo') # find part of the page you want image of
-#         location = element.location
-#         size = element.size
-#         png = fox.get_screenshot_as_png() # saves screenshot of entire page
-#         fox.quit()
-# 
-#         im = Image.open(BytesIO(png)) # uses PIL library to open image in memory
-# 
-#         left = location['x']
-#         top = location['y']
-#         right = location['x'] + size['width']
-#         bottom = location['y'] + size['height']
-# 
-# 
-#         im = im.crop((left, top, right, bottom)) # defines crop points
-#         im.save('screenshot.png') # saves new cropped image
