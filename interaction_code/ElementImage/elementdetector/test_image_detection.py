@@ -20,11 +20,7 @@ class TestImageDetector():
     
     def test_elements_present(self):
         iplayer_page = IplayerPage(self.driver)
-        logo_present = iplayer_page.verify_element_present('BBC Header')
+        logo_present = iplayer_page.verify_element_present('BBC Header') 
         png = self.driver.get_screenshot_as_png()
-        iplayer_page.print_element_attributes('BBC Header', png)
-        assert logo_present == True
-        
-#     def test_take_page_screenshot(self):
-#         self.driver.save_screenshot('iplayer.png')
-        
+        iplayer_page.get_elements_from_page(png)
+        assert logo_present == True        
