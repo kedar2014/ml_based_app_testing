@@ -18,7 +18,7 @@ class AppFacing:
     #    self.driver = webdriver.Chrome(chromedriver,options=options)
        self.driver = webdriver.Chrome(chromedriver)
        
-       self.driver.set_window_size(150, 1000)
+       self.driver.set_window_size(150, 800)
        self.app = "http://smp-scratch.tools.bbc.co.uk/aimee/machine-learning/treasure-hunt/pages/001.html"
        self.driver.get(self.app)
        self.current_page_url = self.driver.current_url
