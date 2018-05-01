@@ -5,6 +5,7 @@ from appium.webdriver.common.touch_action import TouchAction
 from pip._vendor.distlib.locators import Locator
 from PIL import Image
 from io import BytesIO
+import os
 
 class Screen:
 
@@ -205,9 +206,9 @@ class Screen:
     def get_element_attributes(self, locator):
         element = self.get_element(locator)
         return {
-            'top': element.location['y'],
+            'x': element.location['x'],
+            'y': element.location['y'],
             'bottom': element.location['y'] + element.size['height'],
-            'left': element.location['x'],
             'right': element.location['x'] + element.size['width'],
             'center_x': (element.size['width']/2) + element.location['x'],
             'center_y': (element.size['height']/2) + element.location['y'],
@@ -231,10 +232,24 @@ class Screen:
             self.driver.hide_keyboard()
         except WebDriverException:
             pass
+
+    def get_device_size(self):
+        webview = self.driver.contexts[1]
+        self.driver.switch_to.context('NATIVE_APP')
+        device_size = self.driver.get_window_size()
+        self.driver.switch_to.context(webview)
+        return device_size
+
+
     #take screenshot of element
-    def take_element_screenshot(self, locator, png):
+    def take_element_screenshot(self, element_name, locator, png):
         attributes = self.get_element_attributes(locator)
-        top, bottom, left, right = [attributes['top'], attributes['height'], attributes['left'], attributes['width']]
+        device_size = self.get_device_size()
+        print('*******')
+        print(str(attributes['x']) + ':' + str(attributes['y']) + ':' + str(attributes['right']) + ':' +  str(attributes['bottom']) + ':' +  str(attributes['height']) + ':' +  str(attributes['width']))
+        print('*******')
+        x, y, width, height = [attributes['x'], attributes['y'], attributes['right'], attributes['bottom']]
         im = Image.open(BytesIO(png)) # uses PIL library to open image in memory
-        im = im.crop((left, top, (3*right), (3*bottom))) # defines crop points
-        im.save('screenshot.png') # saves new cropped image
+        im = im.crop((3*x, 3*y, 2.5*width, 3*height)) # defines crop points
+        screenshot_name = element_name + '.png'
+        im.save("screenshots/" + screenshot_name) # saves new cropped image
