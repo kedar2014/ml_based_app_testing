@@ -27,7 +27,7 @@ class AppFacing:
         png = self.driver.get_screenshot_as_png()
         img = Image.open(io.BytesIO(png)).convert('1')
         img.save('./temp/result.png')
-        return np.array(img).flatten()[:1374400]
+        return np.array(img).flatten()[:1097600]
 
     def get_reward(self):
         reward = 0
@@ -70,6 +70,6 @@ class AppFacing:
     def reset(self):
         self.counter=0
         self.driver.get(self.app)
-        self.driver.set_window_size(150, 1000)
+        self.driver.set_window_size(150, 800)
         observation = self.take_current_page_screenshot()
         return observation

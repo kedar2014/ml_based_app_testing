@@ -13,7 +13,7 @@ decay_rate = 0.99 # decay factor for RMSProp leaky sum of grad^2
 resume = False # resume from previous checkpoint?
 render = True
 train = True
-D = 1374400
+D = 1097600
 episode_number = 0
 logs_path = './logs/2'
 
@@ -68,7 +68,7 @@ with tf.name_scope('Model'):
                             trainable=True)
     tf.summary.histogram("Weights_FirstLayer",tf.trainable_variables()[0])
     
-    img1 = tf.reshape(tf.transpose(tf.trainable_variables()[0],None),[-1,800,1718,1])
+    img1 = tf.reshape(tf.transpose(tf.trainable_variables()[0],None),[-1,800,1372,1])
     tf.summary.image('weight_layer1',img1,max_outputs=50)                        
 
 
