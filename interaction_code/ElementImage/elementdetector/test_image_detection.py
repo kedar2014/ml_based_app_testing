@@ -5,11 +5,15 @@ Created on Apr 24, 2018
 '''
 import pytest
 #import os
-from elementdetector.pages.iplayer_page import IplayerPage
+from elementdetector.pages.iplayer_page import 
 
 @pytest.mark.usefixtures('driver_setup')
 class TestImageDetector(): 
     
+
+    def __init__(self):
+        self.driver.get('link')
+
     @pytest.mark.run(order=1)
     def test_visit_url(self):
         self.driver.get('http://bbc.co.uk/iplayer')
@@ -17,6 +21,9 @@ class TestImageDetector():
     def test_closing_cookie(self):
         iplayer_page = IplayerPage(self.driver)
         iplayer_page.close_cookie()
+
+    def get_all_links(self):
+        elems = self.driver.find_elements_by_xpath("//a[@href]")
     
     def test_elements_present(self):
         iplayer_page = IplayerPage(self.driver)
