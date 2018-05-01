@@ -26,7 +26,7 @@ class AppFacing:
     def take_current_page_screenshot(self):
         png = self.driver.get_screenshot_as_png()
         img = Image.open(io.BytesIO(png)).convert('1')
-        img.save('/Users/bardek01/Downloads/result.png')
+        img.save('./temp/result.png')
         return np.array(img).flatten()[:1374400]
 
     def get_reward(self):

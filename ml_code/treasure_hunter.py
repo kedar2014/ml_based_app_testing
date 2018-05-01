@@ -15,7 +15,7 @@ render = True
 train = True
 D = 1374400
 episode_number = 0
-logs_path = '/Users/bardek01/Personal/projects/ml_based_app_testing/logs/2'
+logs_path = './logs/2'
 
 env = app_code.AppFacing()
 observation = env.reset()

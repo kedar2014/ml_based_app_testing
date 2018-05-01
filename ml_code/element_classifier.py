@@ -9,8 +9,8 @@ import models as model
 #tf.enable_eager_execution()
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
-logs_path = '/Users/bardek01/Personal/projects/ml_based_app_testing/logs/1'
-image_folder_path = '/Users/bardek01/Downloads/lfw'
+logs_path = './logs/1'
+image_folder_path = './temp'
 
 
 #Generate batch parameters
