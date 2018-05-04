@@ -3,22 +3,29 @@ from selenium import webdriver
 from PIL import Image
 import numpy as np
 import io
-
+from appium import webdriver
 
 
 class AppFacing:
-    
-    def __init__(self):
-       self.counter = 0          
-       chromedriver = "/Users/bardek01/Downloads/chromedriver"
-       os.environ["webdriver.chrome.driver"] = chromedriver
 
-    #    options = webdriver.ChromeOptions()
-    #    options.add_argument('--headless')   
-    #    self.driver = webdriver.Chrome(chromedriver,options=options)
-       self.driver = webdriver.Chrome(chromedriver)
-       
-       self.driver.set_window_size(150, 800)
+    def __init__(self):
+       self.counter = 0
+    #    chromedriver = "/Users/bardek01/Downloads/chromedriver"
+    #    os.environ["webdriver.chrome.driver"] = chromedriver
+    #
+    # #    options = webdriver.ChromeOptions()
+    # #    options.add_argument('--headless')
+    # #    self.driver = webdriver.Chrome(chromedriver,options=options)
+    #    self.driver = webdriver.Chrome(chromedriver)
+       capabilities = {
+           'platformName': 'Android',
+           'udid': '0aef21ee02e4221a',
+           'browserName': 'chrome',
+           'deviceName': 'Nexus 5'
+       }
+       url = 'http://localhost:4723/wd/hub'
+       self.driver = webdriver.Remote(url, capabilities)
+       #self.driver.set_window_size(150, 800)
        self.app = "http://smp-scratch.tools.bbc.co.uk/aimee/machine-learning/treasure-hunt/pages/001.html"
        self.driver.get(self.app)
        self.current_page_url = self.driver.current_url
@@ -36,11 +43,11 @@ class AppFacing:
         elif "bones.html" in self.driver.current_url:
             reward = -2
         elif "treasure.html" in self.driver.current_url:
-            reward = 2   
-        else: 
+            reward = 2
+        else:
             reward = 1
 
-        self.current_page_url = self.driver.current_url    
+        self.current_page_url = self.driver.current_url
         return reward
 
     def get_all_links_on_page(self):
@@ -66,7 +73,7 @@ class AppFacing:
 
         return observation,reward,done,"info"
 
-                
+
     def reset(self):
         self.counter=0
         self.driver.get(self.app)
