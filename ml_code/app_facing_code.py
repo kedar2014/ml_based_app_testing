@@ -3,6 +3,7 @@ from selenium import webdriver
 from PIL import Image
 import numpy as np
 import io
+import os
 #from appium import webdriver
 
 
@@ -12,7 +13,7 @@ class AppFacing:
        self.counter = 0
 
        if device_type=="pc":
-        chromedriver = "/Users/bardek01/Setups/chromedriver"
+        chromedriver = os.environ['CHROMDRIVER_PATH']
         os.environ["webdriver.chrome.driver"] = chromedriver
         options = webdriver.ChromeOptions()
         self.driver = webdriver.Chrome(chromedriver,options=options)
@@ -25,7 +26,7 @@ class AppFacing:
        elif device_type=='mobile':
         capabilities = {
             'platformName': 'Android',
-            'udid': 'GAAZCJ005904NV4',
+            'udid': os.environ['ADB_DEVICE_ARGS'],
             'browserName': 'chrome',
             'deviceName': 'ASUS_Z01BDB'
         }
