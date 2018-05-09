@@ -17,9 +17,9 @@ class AppFacing:
         options = webdriver.ChromeOptions()
         self.driver = webdriver.Chrome(chromedriver,options=options)
         self.size = self.driver.get_window_size()
-        self.driver.execute_script("document.body.style.zoom=67")
         self.size['width'] = int(self.size['width']*0.25)
         self.size['height'] = int(self.size['height']*0.80)
+
         self.driver.set_window_size(self.size['width'], self.size['height'])
 
        elif device_type=='mobile':
@@ -90,3 +90,5 @@ class AppFacing:
         observation = self.take_current_page_screenshot()
         return observation
 
+    def resize_window(self):
+        self.driver.execute_script("document.body.style.zoom='.4'")

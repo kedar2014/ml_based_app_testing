@@ -17,7 +17,7 @@ render = True
 train = True
 #D = 594000
 episode_number = 0
-logs_path = '../logs/3/'
+logs_path = '/Users/bardek01/Personal/projects/ml_based_app_testing/logs/3/'
 
 env = app_code.AppFacing('mobile')
 observation = env.reset()
@@ -162,7 +162,7 @@ with tf.Session() as sess:
                 # logits_val = sess.run([softmax_op],feed_dict={input_x : observations_input})   
                 _, s,loss_val,cross_en,softmaxy = sess.run([train_op,merged_summary,loss,cross_entropies,softmax_op],feed_dict={input_x : observations_input,actions: py_labels,rewards: reward_list_discounted})
                 print ('episode number :- ', episode_number)
-                print ('loss:-', loss_val)
+                print ('loss    ', loss_val)
                 #print 'grads:-', sess.run(grads_and_vars,feed_dict={input_x : observations_input,actions: py_labels,rewards: reward_list_discounted})
                                 
                 writer.add_summary(s,global_step=episode_number)
