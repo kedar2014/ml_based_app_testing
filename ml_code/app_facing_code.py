@@ -3,51 +3,62 @@ from selenium import webdriver
 from PIL import Image
 import numpy as np
 import io
-from appium import webdriver
+import os
+#from appium import webdriver
 
 
 class AppFacing:
 
-    def __init__(self):
+    def __init__(self,device_type):
        self.counter = 0
-    #    chromedriver = "/Users/bardek01/Downloads/chromedriver"
-    #    os.environ["webdriver.chrome.driver"] = chromedriver
-    #
-    # #    options = webdriver.ChromeOptions()
-    # #    options.add_argument('--headless')
-    # #    self.driver = webdriver.Chrome(chromedriver,options=options)
-    #    self.driver = webdriver.Chrome(chromedriver)
-       capabilities = {
-           'platformName': 'Android',
-           'udid': '0aef21ee02e4221a',
-           'browserName': 'chrome',
-           'deviceName': 'Nexus 5'
-       }
-       url = 'http://localhost:4723/wd/hub'
-       self.driver = webdriver.Remote(url, capabilities)
-       #self.driver.set_window_size(150, 800)
+
+       if device_type=="pc":
+        chromedriver = os.environ['CHROMDRIVER_PATH']
+        os.environ["webdriver.chrome.driver"] = chromedriver
+        options = webdriver.ChromeOptions()
+        self.driver = webdriver.Chrome(chromedriver,options=options)
+        self.size = self.driver.get_window_size()
+        self.size['width'] = int(self.size['width']*0.25)
+        self.size['height'] = int(self.size['height']*0.80)
+
+        self.driver.set_window_size(self.size['width'], self.size['height'])
+
+       elif device_type=='mobile':
+        capabilities = {
+            'platformName': 'Android',
+            'udid': os.environ['ADB_DEVICE_ARGS'],
+            'browserName': 'chrome',
+            'deviceName': 'ASUS_Z01BDB'
+        }
+        url = 'http://localhost:4723/wd/hub'
+        self.driver = webdriver.Remote(url, capabilities)
+       
        self.app = "http://smp-scratch.tools.bbc.co.uk/aimee/machine-learning/treasure-hunt/pages/001.html"
        self.driver.get(self.app)
        self.current_page_url = self.driver.current_url
 
+    def get_observation_size(self):
+        return self.width, self.height
+        
     def take_current_page_screenshot(self):
         png = self.driver.get_screenshot_as_png()
         img = Image.open(io.BytesIO(png)).convert('1')
-        img.save('./temp/result.png')
-        return np.array(img).flatten()[:1097600]
+        img.save('/tmp/result.png')
+        self.width,self.height = img.size
+        return np.array(img).flatten()[:(self.width * self.height)]
 
     def get_reward(self):
         reward = 0
         if self.driver.current_url==self.current_page_url:
             reward = 0
         elif "bones.html" in self.driver.current_url:
-            reward = -2
+            reward = -1
         elif "treasure.html" in self.driver.current_url:
-            reward = 2
-        else:
-            reward = 1
+            reward = 1   
+        else: 
+            reward = 0
+        self.current_page_url = self.driver.current_url    
 
-        self.current_page_url = self.driver.current_url
         return reward
 
     def get_all_links_on_page(self):
@@ -59,24 +70,26 @@ class AppFacing:
         all_links = self.get_all_links_on_page()
         try:
          all_links[action_no].click()
+         reward = self.get_reward()
         except:
+         reward = -1
          print("action not done")
-
         observation = self.take_current_page_screenshot()
-        reward = self.get_reward()
+
 
         if self.counter==2:
             done = True
         else:
             done=False
 
-
         return observation,reward,done,"info"
-
-
+                
     def reset(self):
         self.counter=0
         self.driver.get(self.app)
-        self.driver.set_window_size(150, 800)
+        #self.driver.set_window_size(150, 1000)
         observation = self.take_current_page_screenshot()
         return observation
+
+    def resize_window(self):
+        self.driver.execute_script("document.body.style.zoom='.4'")
