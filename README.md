@@ -46,4 +46,6 @@ npm install appium@1.7.1
 ```
 cd tensorflow/bin 
 tensorboard --logdir /path/to/log/directory/mentioned/in/treasure_hunter.py/logs_path
+
+Tensorboard will be visible on localhost:6006
 ```
