@@ -36,7 +36,7 @@ npm install appium@1.7.1
 
 #### To run on a mobile 
 ```
-1. Start appium in a terminal. Command: `appium/node_modules/.bin/appium`
+1. Start appium in a terminal. Command: appium/node_modules/.bin/appium
 2. Connect an android device or start an emulator
 3. Run below command    
     TARGET_MACHINE=mobile ADB_DEVICE_ARGS=`adb devices | awk {'print $1'} | sed -n 2p` python ml_code/treasure_hunter.py
