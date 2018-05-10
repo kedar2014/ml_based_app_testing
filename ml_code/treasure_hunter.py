@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python import debug as tf_debug
 import app_facing_code as app_code
+import os
 
 H1 = 32 # number of hidden layer neurons
 H2 = 64
@@ -17,9 +18,12 @@ render = True
 train = True
 #D = 594000
 episode_number = 0
-logs_path = '/Users/bardek01/Personal/projects/ml_based_app_testing/logs/3/'
+logs_path = './logs/3/'
 
-env = app_code.AppFacing('pc')
+target_machine = "pc" if os.environ['TARGET_MACHINE'] == None else os.environ['TARGET_MACHINE']
+env = app_code.AppFacing(target_machine)
+
+#env = app_code.AppFacing('mobile')
 observation = env.reset()
 x,y = env.get_observation_size()
 D = x * y
