@@ -41,3 +41,9 @@ npm install appium@1.7.1
 3. Run below command    
     TARGET_MACHINE=mobile ADB_DEVICE_ARGS=`adb devices | awk {'print $1'} | sed -n 2p` python ml_code/treasure_hunter.py
 ```   
+
+## Start tensor board
+```
+cd tensorflow/bin 
+tensorboard --logdir /path/to/log/directory/mentioned/in/treasure_hunter.py/logs_path
+```
