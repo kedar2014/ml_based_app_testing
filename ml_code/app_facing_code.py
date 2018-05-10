@@ -36,7 +36,7 @@ class AppFacing:
             'platformName': 'Android',
             'udid': device_id,
             'browserName': 'chrome',
-            'deviceName': 'ASUS_Z01BDB'
+            'deviceName': 'MyDevice'
         }
         url = 'http://localhost:4723/wd/hub'
         self.driver = webdriver.Remote(url, capabilities)
