@@ -19,7 +19,7 @@ train = True
 episode_number = 0
 logs_path = '/Users/bardek01/Personal/projects/ml_based_app_testing/logs/3/'
 
-env = app_code.AppFacing('mobile')
+env = app_code.AppFacing('pc')
 observation = env.reset()
 x,y = env.get_observation_size()
 D = x * y
@@ -72,7 +72,7 @@ with tf.name_scope('Model'):
                             trainable=True)
     tf.summary.histogram("Weights_FirstLayer",tf.trainable_variables()[0])
     
-    img1 = tf.reshape(tf.transpose(tf.trainable_variables()[0],None),[-1,x,y,1])
+    img1 = tf.reshape(tf.transpose(tf.trainable_variables()[0],None),[-1,y,x,1])
     tf.summary.image('weight_layer1',img1,max_outputs=50)                        
 
     ly2 = tf.layers.dense(ly1,H2,
