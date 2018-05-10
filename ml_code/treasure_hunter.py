@@ -20,7 +20,7 @@ train = True
 episode_number = 0
 logs_path = './logs/3/'
 
-target_machine = "pc" if os.environ['TARGET_MACHINE'] == None else os.environ['TARGET_MACHINE']
+target_machine = os.environ.get('TARGET_MACHINE') or 'pc'
 env = app_code.AppFacing(target_machine)
 
 #env = app_code.AppFacing('mobile')

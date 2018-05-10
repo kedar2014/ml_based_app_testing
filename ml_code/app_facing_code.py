@@ -11,9 +11,12 @@ class AppFacing:
 
     def __init__(self,device_type):
        self.counter = 0
-
        if device_type=="pc":
-        chromedriver = os.environ['CHROMDRIVER_PATH']
+        chromedriver = os.environ.get('CHROMEDRIVER_PATH')
+
+        if chromedriver is None:
+            raise ValueError('Please set CHROMEDRIVER_PATH environment variable')
+
         os.environ["webdriver.chrome.driver"] = chromedriver
         options = webdriver.ChromeOptions()
         self.driver = webdriver.Chrome(chromedriver,options=options)
