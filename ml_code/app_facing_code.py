@@ -27,9 +27,14 @@ class AppFacing:
         self.driver.set_window_size(self.size['width'], self.size['height'])
 
        elif device_type=='mobile':
+        device_id = os.environ['ADB_DEVICE_ARGS']
+        
+        if device_id is None:
+            raise ValueError('Please set ADB_DEVICE_ARGS environment variable')
+            
         capabilities = {
             'platformName': 'Android',
-            'udid': os.environ['ADB_DEVICE_ARGS'],
+            'udid': device_id,
             'browserName': 'chrome',
             'deviceName': 'ASUS_Z01BDB'
         }
