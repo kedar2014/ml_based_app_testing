@@ -18,3 +18,8 @@ The Machine Learning Algorithm is presented an Application [Mobile / Web App] -A
 To run on a pc using Selenium webdriver and chromedriver:
 
     TARGET_MACHINE=pc CHROMEDRIVER_PATH=`which chromedriver` python ml_code/treasure_hunter.py
+
+To run on a mobile 
+    
+    TARGET_MACHINE=mobile ADB_DEVICE_ARGS=`adb devices | awk {'print $1'} | sed -n 2p` python ml_code/treasure_hunter.py
+   
