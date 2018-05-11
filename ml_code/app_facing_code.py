@@ -4,6 +4,7 @@ from PIL import Image
 import numpy as np
 import io
 import os
+from appium_helper import AppiumHelper
 #from appium import webdriver
 
 
@@ -27,22 +28,17 @@ class AppFacing:
         self.driver.set_window_size(self.size['width'], self.size['height'])
 
        elif device_type=='mobile':
-        capabilities = {
-            'platformName': 'Android',
-            'udid': os.environ['ADB_DEVICE_ARGS'],
-            'browserName': 'chrome',
-            'deviceName': 'ASUS_Z01BDB'
-        }
+        capabilities = AppiumHelper.get_device_capabilities()
         url = 'http://localhost:4723/wd/hub'
         self.driver = webdriver.Remote(url, capabilities)
-       
+
        self.app = "http://smp-scratch.tools.bbc.co.uk/aimee/machine-learning/treasure-hunt/pages/001.html"
        self.driver.get(self.app)
        self.current_page_url = self.driver.current_url
 
     def get_observation_size(self):
         return self.width, self.height
-        
+
     def take_current_page_screenshot(self):
         png = self.driver.get_screenshot_as_png()
         img = Image.open(io.BytesIO(png)).convert('1')
@@ -57,10 +53,10 @@ class AppFacing:
         elif "bones.html" in self.driver.current_url:
             reward = -1
         elif "treasure.html" in self.driver.current_url:
-            reward = 1   
-        else: 
+            reward = 1
+        else:
             reward = 0
-        self.current_page_url = self.driver.current_url    
+        self.current_page_url = self.driver.current_url
 
         return reward
 
@@ -86,7 +82,7 @@ class AppFacing:
             done=False
 
         return observation,reward,done,"info"
-                
+
     def reset(self):
         self.counter=0
         self.driver.get(self.app)
