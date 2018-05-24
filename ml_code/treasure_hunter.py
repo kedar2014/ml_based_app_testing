@@ -9,9 +9,10 @@ import os
 H1 = 32 # number of hidden layer neurons
 H2 = 64
 H3 = 128
+choices = 100 # how many links to choose from
 batch_size = 1 # every how many episodes to do a param update?
-lr_rate = 0.001
-gamma = 0.90 # discount factor for reward
+lr_rate = 0.0001
+gamma = 0.99 # discount factor for reward
 decay_rate = 0.99 # decay factor for RMSProp leaky sum of grad^2
 resume = True # resume from previous checkpoint?
 render = False
@@ -81,7 +82,7 @@ with tf.name_scope('Model'):
     tf.summary.histogram("Weights_FirstLayer",tf.trainable_variables()[0])
     
     img1 = tf.reshape(tf.transpose(tf.trainable_variables()[0],None),[-1,y,x,1])
-    tf.summary.image('weight_layer1',img1,max_outputs=50)                        
+    #tf.summary.image('weight_layer1',img1,max_outputs=50)                        
 
     ly2 = tf.layers.dense(ly1,H2,
                             use_bias=False,
@@ -98,7 +99,7 @@ with tf.name_scope('Model'):
                             trainable=True)                        
 
     #W2 = tf.get_variable(name="W2",shape=2,dtype=tf.float32)                        
-    output = tf.layers.dense(ly3,6,use_bias=False,
+    output = tf.layers.dense(ly3, choices ,use_bias=False,
                             kernel_initializer = tf.random_normal_initializer(mean=0.0, stddev=0.01),
                             activation=None,
                             name="Output_Layer",
@@ -111,7 +112,7 @@ with tf.name_scope('Model'):
 with tf.name_scope('Training'):
     #actions_one_hot = tf.one_hot(actions,6,1.0)
     #cross_entropies = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=actions,logits=output)
-    cross_entropies = tf.losses.softmax_cross_entropy(onehot_labels=tf.one_hot(actions,6),logits=output,reduction=tf.losses.Reduction.NONE)
+    cross_entropies = tf.losses.softmax_cross_entropy(onehot_labels=tf.one_hot(actions, choices),logits=output,reduction=tf.losses.Reduction.NONE)
     loss_pre = rewards * cross_entropies
     loss = tf.reduce_sum(loss_pre)
    
@@ -150,7 +151,7 @@ with tf.Session() as sess:
         observations_input.append(observation)
         py_labels.append(action[0][0])
 
-        observation, reward, done, info = env.step(action[0][0])   # 6 possible actions
+        observation, reward, done, info = env.step(action[0][0])   # possible actions
        
         total_rewards += reward
 
@@ -159,7 +160,8 @@ with tf.Session() as sess:
         if done:
                         
             episode_number+=1
-            print ('ep %d: game finished, total rewards: %f, actions taken %d -> %d' % (episode_number, total_rewards, py_labels[0],py_labels[1])) 
+            print ('ep %d: game finished, total rewards: %f, actions taken...' % (episode_number, total_rewards))
+            print(*py_labels, sep = ", ")
 
             reward_list_discounted = np.hstack((reward_list_discounted, discount_rewards(reward_list)))
             reward_list = []
@@ -180,6 +182,12 @@ with tf.Session() as sess:
                 saver.save(sess, logs_path + 'treasure.ckpt', global_step=None,write_meta_graph=True)
                 reward_list,py_labels,observations_input,reward_list_discounted = [],[],[],[]
 
+        
+            print(" ")
+            print("=============================")
+            print("A new epsisode beginning now!")
+            print("=============================")
+            print(" ")
         
 
 

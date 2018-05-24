@@ -21,9 +21,9 @@ class AppFacing:
         os.environ["webdriver.chrome.driver"] = chromedriver
         options = webdriver.ChromeOptions()
         options.add_argument("disable-infobars")
-        if render==True:
+        if render==False:
            options.add_argument("--headless")
-           options.add_argument("window-size=600x400")
+           options.add_argument("window-size=800x1000")
         
         self.driver = webdriver.Chrome(chromedriver,options=options)
         self.size = self.driver.get_window_size()
@@ -39,7 +39,7 @@ class AppFacing:
         url = 'http://localhost:4723/wd/hub'
         self.driver = webdriver.Remote(url, capabilities)
 
-       self.app = "http://smp-scratch.tools.bbc.co.uk/aimee/machine-learning/treasure-hunt/pages/001.html"
+       self.app = "http://www.bbc.co.uk/news"
        self.driver.get(self.app)
        self.current_page_url = self.driver.current_url
 
@@ -55,17 +55,20 @@ class AppFacing:
 
     def get_reward(self):
         reward = 0
+        done = False
+        print(self.driver.current_url)
         if self.driver.current_url==self.current_page_url:
-            reward = 0
-        elif "bones.html" in self.driver.current_url:
             reward = -1
-        elif "treasure.html" in self.driver.current_url:
+        elif "sport" in self.driver.current_url:
             reward = 1
+            done = True
+            print("should be done!", done)
         else:
             reward = 0
+
         self.current_page_url = self.driver.current_url
 
-        return reward
+        return reward, done
 
     def get_all_links_on_page(self):
          self.current_page_links = self.driver.find_elements_by_xpath("//a[@href]")
@@ -73,21 +76,23 @@ class AppFacing:
 
     def step(self,action_no):
         self.counter = self.counter + 1
+        done = False
         all_links = self.get_all_links_on_page()
         try:
          all_links[action_no].click()
-         reward = self.get_reward()
-        except:
+         reward, done = self.get_reward()
+         print("Are we done?", done)
+        except Exception as e:
          reward = -1
-         print("action not done")
+         print("action not done: ", e)
         observation = self.take_current_page_screenshot()
 
 
-        if self.counter==2:
+        print("Deciding if done", done)
+        if done or self.counter==5:
             done = True
-        else:
-            done=False
 
+        print("Returning to main code", done)
         return observation,reward,done,"info"
 
     def reset(self):
