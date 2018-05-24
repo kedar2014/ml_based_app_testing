@@ -57,12 +57,12 @@ class AppFacing:
         reward = 0
         done = False
         print(self.driver.current_url)
-        if self.driver.current_url==self.current_page_url:
-            reward = -1
-        elif "sport" in self.driver.current_url:
+        if "sport" in self.driver.current_url:
             reward = 1
             done = True
             print("should be done!", done)
+        elif self.driver.current_url==self.current_page_url:
+            reward = -1
         else:
             reward = 0
 
