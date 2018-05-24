@@ -143,7 +143,6 @@ with tf.Session() as sess:
         episode_number = global_step.eval()
   
     while True:
-        
         # if render: env.render()
         #
         # output1 = sess.run(output, feed_dict={input_x : [observation]})   
@@ -188,9 +187,6 @@ with tf.Session() as sess:
             print("A new epsisode beginning now!")
             print("=============================")
             print(" ")
-        
-
-
 
 
 

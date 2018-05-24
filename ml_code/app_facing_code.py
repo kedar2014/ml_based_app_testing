@@ -7,7 +7,6 @@ import os
 from appium_helper import AppiumHelper
 #from appium import webdriver
 
-
 class AppFacing:
 
     def __init__(self,device_type,render):
@@ -60,7 +59,6 @@ class AppFacing:
         if "sport" in self.driver.current_url:
             reward = 1
             done = True
-            print("should be done!", done)
         elif self.driver.current_url==self.current_page_url:
             reward = -1
         else:
@@ -81,18 +79,14 @@ class AppFacing:
         try:
          all_links[action_no].click()
          reward, done = self.get_reward()
-         print("Are we done?", done)
         except Exception as e:
          reward = -1
          print("action not done: ", e)
         observation = self.take_current_page_screenshot()
 
-
-        print("Deciding if done", done)
         if done or self.counter==5:
             done = True
 
-        print("Returning to main code", done)
         return observation,reward,done,"info"
 
     def reset(self):
