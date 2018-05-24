@@ -9,17 +9,24 @@ import os
 
 class AppFacing:
 
-    def __init__(self,device_type):
+    def __init__(self,device_type,render):
        self.counter = 0
 
        if device_type=="pc":
-        chromedriver = os.environ['CHROMDRIVER_PATH']
+        chromedriver = os.environ['CHROMEDRIVER_PATH']
         os.environ["webdriver.chrome.driver"] = chromedriver
         options = webdriver.ChromeOptions()
+        options.add_argument("disable-infobars")
+        if render==True:
+           options.add_argument("--headless")
+           options.add_argument("window-size=600x400")
+        
         self.driver = webdriver.Chrome(chromedriver,options=options)
         self.size = self.driver.get_window_size()
-        self.size['width'] = int(self.size['width']*0.25)
-        self.size['height'] = int(self.size['height']*0.80)
+        # self.size['width'] = int(self.size['width']*0.25)
+        # self.size['height'] = int(self.size['height']*0.80)
+        # self.size['width'] = 600
+        # self.size['height'] = 400
 
         self.driver.set_window_size(self.size['width'], self.size['height'])
 
