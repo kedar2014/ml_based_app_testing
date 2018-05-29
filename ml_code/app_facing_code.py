@@ -9,7 +9,7 @@ import os
 
 class AppFacing:
 
-    def __init__(self,device_type):
+    def __init__(self,device_type,render):
        self.counter = 0
        if device_type=="pc":
         chromedriver = os.environ.get('CHROMEDRIVER_PATH')
@@ -19,12 +19,16 @@ class AppFacing:
 
         os.environ["webdriver.chrome.driver"] = chromedriver
         options = webdriver.ChromeOptions()
+        options.add_argument("disable-infobars")
+        self.width = 640
+        self.height = 554
+        if render==False:
+           options.add_argument("--headless")
+           self.height = 480
+        
         self.driver = webdriver.Chrome(chromedriver,options=options)
-        self.size = self.driver.get_window_size()
-        self.size['width'] = int(self.size['width']*0.25)
-        self.size['height'] = int(self.size['height']*0.80)
-
-        self.driver.set_window_size(self.size['width'], self.size['height'])
+        self.size = self.driver.get_window_size()      
+        self.driver.set_window_size(self.width, self.height , self.driver.window_handles[0])
 
        elif device_type=='mobile':
         device_id = os.environ.get('ADB_DEVICE_ARGS')
@@ -95,7 +99,6 @@ class AppFacing:
     def reset(self):
         self.counter=0
         self.driver.get(self.app)
-        #self.driver.set_window_size(150, 1000)
         observation = self.take_current_page_screenshot()
         return observation
 
