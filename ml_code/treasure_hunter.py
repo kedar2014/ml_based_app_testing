@@ -11,12 +11,11 @@ H2 = 64
 H3 = 128
 batch_size = 1 # every how many episodes to do a param update?
 lr_rate = 0.0001
-gamma = 0.99 # discount factor for reward
+gamma = 0.90 # discount factor for reward
 decay_rate = 0.99 # decay factor for RMSProp leaky sum of grad^2
-resume = False # resume from previous checkpoint?
+resume = True # resume from previous checkpoint?
 render = True
-train = True
-#D = 594000
+train = False
 episode_number = 0
 logs_path = './logs/3/'
 

@@ -6,11 +6,12 @@ import re
 import util_classifier as ut
 import models as model
 
-#tf.enable_eager_execution()
+tf.enable_eager_execution()
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 logs_path = './logs/1'
 image_folder_path = './temp'
+image_folder_path = '/Users/bardek01/Downloads/lfw'
 
 
 #Generate batch parameters
@@ -24,7 +25,7 @@ util_obj = ut.Utilities()
 # Model Hyper parameters
 lr_rate = 0.001
 decay_rate = 0.01
-num_epochs=5000
+num_epochs=5
 
 #grid_tf = tf.placeholder(tf.float32,shape=[3, 0, 1, 2],name = 'grid_tf')
 
@@ -58,6 +59,9 @@ def preprocess_image_tensor(image_tf):
 image_paths, labels  = get_data(image_folder_path,master_labels_arr)
 image_paths_tf = tf.convert_to_tensor(image_paths, dtype=tf.string, name='image_paths')
 labels_tf = tf.convert_to_tensor(labels, dtype=tf.int32, name='labels')
+
+tf.data.Dataset.from_tensor_slices((image_paths_tf,labels_tf)).shuffle(1000).batch(batch_size)
+label_one_hot = tf.one_hot(dataset.map,categories,1.0,0.0, name="one_hot_label")
 image_path_tf, label_tf = tf.train.slice_input_producer([image_paths_tf, labels_tf], shuffle=True)
 label_one_hot = tf.one_hot(label_tf,categories,1.0,0.0, name="one_hot_label")
 

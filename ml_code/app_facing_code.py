@@ -21,10 +21,8 @@ class AppFacing:
         options = webdriver.ChromeOptions()
         self.driver = webdriver.Chrome(chromedriver,options=options)
         self.size = self.driver.get_window_size()
-        self.size['width'] = int(self.size['width']*0.25)
-        self.size['height'] = int(self.size['height']*0.80)
-
-        self.driver.set_window_size(self.size['width'], self.size['height'])
+        self.driver.maximize_window()      
+        #self.driver.set_window_size(2400,1792, self.driver.window_handles[0])
 
        elif device_type=='mobile':
         device_id = os.environ.get('ADB_DEVICE_ARGS')
@@ -41,7 +39,7 @@ class AppFacing:
         url = 'http://localhost:4723/wd/hub'
         self.driver = webdriver.Remote(url, capabilities)
        
-       self.app = "http://smp-scratch.tools.bbc.co.uk/aimee/machine-learning/treasure-hunt/pages/001.html"
+       self.app = "https://www.bbc.co.uk/sport/41527965"
        self.driver.get(self.app)
        self.current_page_url = self.driver.current_url
 
@@ -101,3 +99,6 @@ class AppFacing:
 
     def resize_window(self):
         self.driver.execute_script("document.body.style.zoom='.4'")
+
+    def get_driver(self):
+        return self.driver

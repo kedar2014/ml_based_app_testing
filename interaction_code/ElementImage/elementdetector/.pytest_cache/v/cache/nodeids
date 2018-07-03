@@ -1,5 +1,0 @@
-[
-  "test_image_detection.py::TestImageDetector::()::test_visit_url",
-  "test_image_detection.py::TestImageDetector::()::test_closing_cookie",
-  "test_image_detection.py::TestImageDetector::()::test_elements_present"
-]

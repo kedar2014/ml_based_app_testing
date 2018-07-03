@@ -4,3 +4,4 @@ numpy==1.14.2
 scikit-learn>=0.19
 Pillow==3.4.2
 Appium-Python-Client
+StringIO
