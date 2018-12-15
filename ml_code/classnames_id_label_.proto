@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+package ml_code;
+
+message Item {
+ 
+  required string name = 1;
+  optional int32 id = 2;
+
+}
+
+message ClassMap {
+  repeated Item Items = 1;
+}

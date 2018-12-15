@@ -1,0 +1,8 @@
+<boxes>
+  - {label: Green, occluded: false, x_max: 582.3417892052, x_min: 573.3726437481,
+    y_max: 276.6271175345, y_min: 256.3114627642}
+  - {label: Green, occluded: false, x_max: 517.6267821724, x_min: 510.0276868266,
+    y_max: 273.164089267, y_min: 256.4279864221}
+  path: ./rgb/train/2015-10-05-16-02-30_bag/720654.png
+</boxes>
+  path: ./rgb/train/2015-10-05-16-02-30_bag/720932.png

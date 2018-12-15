@@ -1,6 +1,19 @@
 import numpy as np
 from math import sqrt
 import tensorflow as tf
+from xml.etree.ElementTree import Element, SubElement, Comment, tostring, ElementTree
+import io
+import classnames_id_label__pb2
+import random
+from scipy import ndarray
+from scipy.misc import imread, imsave, imresize
+import skimage as sk
+from skimage import transform
+from skimage import util
+from PIL import Image
+from io import BytesIO
+from skimage.color import rgb2gray
+
 
 class Utilities:
 
@@ -8,13 +21,13 @@ class Utilities:
         self.total_predictions = 0
         self.correct_predictions = 0
         
-    def calc_accuracy(self,correct_pedictions_batch,predictions_batch):
-        self.total_predictions = self.total_predictions +  predictions_batch
+    def calc_accuracy(self, correct_pedictions_batch, predictions_batch):
+        self.total_predictions = self.total_predictions + predictions_batch
         self.correct_predictions += np.sum(correct_pedictions_batch)
-        accuracy = (self.correct_predictions / float(self.total_predictions))*100
+        accuracy = (self.correct_predictions / float(self.total_predictions)) * 100
         return accuracy , np.sum(correct_pedictions_batch)
 
-    def weights_to_image_grid(self,kernel,pad = 1):
+    def weights_to_image_grid(self, kernel, pad=1):
         '''Visualize conv. filters as an image (mostly for the 1st layer).
         Arranges filters into a grid, with some paddings between adjacent filters.
         Args:
@@ -23,12 +36,14 @@ class Utilities:
         Return:
             Tensor of shape [1, (Y+2*pad)*grid_Y, (X+2*pad)*grid_X, NumChannels].
         '''
+
         # get shape of the grid. NumKernels == grid_Y * grid_X
         def factorization(n):
             for i in range(int(sqrt(float(n))), 0, -1):
                 if n % i == 0:
                     if i == 1: print('Who would enter a prime number of filters')
                     return (i, int(n / i))
+
         (grid_Y, grid_X) = factorization (kernel.get_shape()[3].value)
         print ('grid: %d = (%d, %d)' % (kernel.get_shape()[3].value, grid_Y, grid_X))
 
@@ -37,7 +52,7 @@ class Utilities:
         kernel = (kernel - x_min) / (x_max - x_min)
 
         # pad X and Y
-        x = tf.pad(kernel, tf.constant( [[pad,pad],[pad, pad],[0,0],[0,0]] ), mode = 'CONSTANT')
+        x = tf.pad(kernel, tf.constant([[pad, pad], [pad, pad], [0, 0], [0, 0]]), mode='CONSTANT')
 
         # X and Y dimensions, w.r.t. padding
         Y = kernel.get_shape()[0] + 2 * pad
@@ -64,3 +79,143 @@ class Utilities:
 
         # scaling to [0, 255] is not necessary for tensorboard
         return x
+
+    def object_boundary_label_xml(self, label, boundary_dict, output_dir):
+        box = Element('box')
+        label_element = Element('label')
+        label_element.text = label
+
+        boundary = Element('boundary')
+
+        box.append(label_element)
+        box.append(boundary)
+
+        xmin = Element('xmin')
+        xmin.text = boundary_dict[0]
+
+        ymin = Element('ymin')
+        ymin.text = boundary_dict[1]
+
+        xmax = Element('xmax')
+        xmax.text = boundary_dict[2]
+
+        ymax = Element('ymax')
+        ymax.text = boundary_dict[3]
+
+        boundary.append(xmin)
+        boundary.append(ymin)
+        boundary.append(xmax)
+        boundary.append(ymax)
+
+        # ElementTree(box).write(output_dir + '/' + label + '.xml')
+        return box
+
+    def bytes_feature(self, value):
+        return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+    def int64_feature(self, value):
+        return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+    
+    def int64_list_feature(self,value):
+      return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
+
+    def float_list_feature(self,value):
+        return tf.train.Feature(float_list=tf.train.FloatList(value=value))
+        
+    def bytes_list_feature(self,value):
+        return tf.train.Feature(bytes_list=tf.train.BytesList(value=value))
+
+    def create_tf_example_object_detection(self, width, height, image_path, image, class_name, class_id):
+        
+        imgByteArr = io.BytesIO()
+        image.save(imgByteArr, format='PNG')
+        imgByteArr = imgByteArr.getvalue()
+        #imgByteArr = image.tobytes
+
+        features_dict = {
+                    'image/height': self.int64_feature(height),
+                    'image/width': self.int64_feature(width),
+                    #'image/filename':self.bytes_feature('try.png'),
+                    #'image/source_id':self.bytes_feature('try.png'),
+                    'image/encoded': self.bytes_feature(imgByteArr),
+                    'image/format': self.bytes_feature(b'png'),
+                    'image/object/bbox/xmin': self.float_list_feature([0.0]),
+                    'image/object/bbox/ymin': self.float_list_feature([0.0]),
+                    'image/object/bbox/xmax': self.float_list_feature([1.0]),
+                    'image/object/bbox/ymax': self.float_list_feature([1.0]),
+                    'image/object/class/text': self.bytes_list_feature([class_name.encode('utf8')]),
+                    'image/object/class/label': self.int64_list_feature([class_id]),
+
+                    }
+        example = tf.train.Example(features=tf.train.Features(feature=features_dict))    
+        return example
+
+    def add_class_to_label_map(self, class_name, class_map):
+        id_if_present = self.is_class_name_present(class_map,class_name)
+        if id_if_present == 0:
+            item_single = class_map.item.add()
+            item_single.name = str(class_name)
+            item_single.id = len(class_map.item)
+            return item_single.id
+        else:
+            return id_if_present
+                
+        
+    def open_file(self, file_name, mode):
+        return open(file_name, mode)
+
+    def is_class_name_present(self, class_map, class_name):
+        presence = 0
+        for item_single in class_map.item:
+            try:
+                if item_single.name.lower()==class_name.lower():
+                    presence=item_single.id
+                    break
+            except Exception:
+                continue
+ 
+        return presence
+
+    def create_augmented_images(self,elements_list,creation_count):
+        train_list = []
+        test_list = []
+        for element_path in elements_list:
+            if random.randint(0,1) == 1:
+                train_list.append(element_path)
+            else:
+                test_list.append(element_path)   
+
+            img_original = imread(element_path[0])
+            for i in range(creation_count):
+                
+                img =  self.random_rotation(img_original) if random.randint(0, 1) == 1 else img_original
+                img =  self.random_noise(img) if random.randint(0, 1) == 1 else img
+                img =  self.greyscale(img) if random.randint(0, 1) == 1 else img
+
+                image_path = element_path[0] + str(i)
+                image_path = image_path.replace(".png","")
+                image_path = image_path + ".png"
+                
+                if random.randint(0,1) == 1:
+                    train_list.append([image_path,element_path[1],element_path[2],element_path[3],element_path[4]])
+                else:
+                    image_path = image_path.replace("train","test")
+                    test_list.append([image_path,element_path[1],element_path[2],element_path[3],element_path[4]])    
+                imsave(image_path, img)
+        return  train_list,test_list          
+
+   
+    def random_rotation(self,image_array: ndarray):
+        random_degree = random.uniform(-25, 25)
+        return sk.transform.rotate(image_array, random_degree)
+
+    def random_noise(self,image_array: ndarray):
+        return sk.util.random_noise(image_array)
+
+    def horizontal_flip(self,image_array: ndarray):
+        return image_array[:, ::-1]
+
+    def greyscale(self,image_array: ndarray):
+        return rgb2gray(image_array)
+
+
