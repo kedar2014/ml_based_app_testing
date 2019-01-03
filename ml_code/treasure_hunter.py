@@ -16,11 +16,12 @@ decay_rate = 0.99 # decay factor for RMSProp leaky sum of grad^2
 resume = True # resume from previous checkpoint?
 render = True
 train = False
+
 episode_number = 0
 logs_path = './logs/3/'
 
-target_machine = os.environ.get('TARGET_MACHINE') or 'pc'
-env = app_code.AppFacing(target_machine)
+target_machine = "pc" if os.environ['TARGET_MACHINE'] == None else os.environ['TARGET_MACHINE']
+env = app_code.AppFacing(target_machine,render)
 
 #env = app_code.AppFacing('mobile')
 observation = env.reset()
@@ -57,6 +58,10 @@ def discount_rewards(r):
     #if r[t] != 0: running_add = 0 # reset the sum, since this was a game boundary (pong specific!)
     running_add = running_add *(gamma**(len(r)-1-t)) + r[t]
     discounted_r[t] = running_add
+
+#   discounted_r -= np.mean(discounted_r)
+#   discounted_r /= np.std(discounted_r)
+
   return discounted_r                            
 
  #variable tensors
@@ -69,7 +74,7 @@ with tf.name_scope('Model'):
     #W3 = tf.constant_initializer(W1)
     ly1 = tf.layers.dense(input_nn,H1,
                             use_bias=False,
-                            kernel_initializer = tf.truncated_normal_initializer(mean=0.0, stddev=0.01),
+                            kernel_initializer = tf.random_normal_initializer(mean=0.0, stddev=0.1),
                             activation=tf.nn.relu,
                             name="first_Layer",
                             trainable=True)
@@ -80,33 +85,33 @@ with tf.name_scope('Model'):
 
     ly2 = tf.layers.dense(ly1,H2,
                             use_bias=False,
-                            kernel_initializer = tf.truncated_normal_initializer(mean=0.0, stddev=0.01),
+                            kernel_initializer = tf.random_normal_initializer(mean=0.0, stddev=0.1),
                             activation=tf.nn.relu,
                             name="Second_hidden",
                             trainable=True)
 
     ly3 = tf.layers.dense(ly2,H3,
                             use_bias=False,
-                            kernel_initializer = tf.truncated_normal_initializer(mean=0.0, stddev=0.01),
+                            kernel_initializer = tf.random_normal_initializer(mean=0.0, stddev=0.01),
                             activation=tf.nn.relu,
                             name="Third_hidden",
                             trainable=True)                        
 
     #W2 = tf.get_variable(name="W2",shape=2,dtype=tf.float32)                        
     output = tf.layers.dense(ly3,6,use_bias=False,
-                            kernel_initializer = tf.truncated_normal_initializer(mean=0.0, stddev=0.1),
+                            kernel_initializer = tf.random_normal_initializer(mean=0.0, stddev=0.01),
                             activation=None,
                             name="Output_Layer",
                             trainable=True)
     tf.summary.histogram("Weights_SecondLayer",tf.trainable_variables()[1])    
     softmax_op = tf.nn.softmax(output)
-    action_op = tf.multinomial(logits = tf.reshape(output,shape = (1,6)),num_samples=1,name='action_sampler')
+    action_op = tf.multinomial(logits = output,num_samples=1,name='action_sampler')
     #action_op = tf.arg_max(tf.reshape(output,shape = (1,3)),1,name='action_sampler')
 
 with tf.name_scope('Training'):
     #actions_one_hot = tf.one_hot(actions,6,1.0)
-    cross_entropies = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=actions,logits=output)
-    #cross_entropies = tf.losses.softmax_cross_entropy(onehot_labels=tf.one_hot(actions,6,1.0),logits=output)
+    #cross_entropies = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=actions,logits=output)
+    cross_entropies = tf.losses.softmax_cross_entropy(onehot_labels=tf.one_hot(actions,6),logits=output,reduction=tf.losses.Reduction.NONE)
     loss_pre = rewards * cross_entropies
     loss = tf.reduce_sum(loss_pre)
    
@@ -130,7 +135,7 @@ with tf.Session() as sess:
     
     sess.run(init)
     writer = tf.summary.FileWriter(logs_path,graph=sess.graph)
-    saver = tf.train.Saver({"W1":tf.trainable_variables()[0],"W2":tf.trainable_variables()[1],"global_step":global_step})  
+    saver = tf.train.Saver(tf.trainable_variables(),{"global_step":global_step})
     
     if resume:
         saver.restore(sess,logs_path + 'treasure.ckpt')
@@ -157,16 +162,16 @@ with tf.Session() as sess:
             print ('ep %d: game finished, total rewards: %f, actions taken %d -> %d' % (episode_number, total_rewards, py_labels[0],py_labels[1])) 
 
             reward_list_discounted = np.hstack((reward_list_discounted, discount_rewards(reward_list)))
-            reward_list = []        
-            total_rewards = 0                      
+            reward_list = []
+            total_rewards = 0
             observation = env.reset()
             if episode_number % batch_size == 0 and train :
                 #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
                 # logits_val = sess.run([softmax_op],feed_dict={input_x : observations_input})   
-                _, s,loss_val,cross_en,softmaxy = sess.run([train_op,merged_summary,loss,cross_entropies,softmax_op],feed_dict={input_x : observations_input,actions: py_labels,rewards: reward_list_discounted})
+                # _, s,loss_val,cross_en,grads = sess.run([train_op,merged_summary,loss,cross_entropies,grads_and_vars],feed_dict={input_x : observations_input,actions: py_labels,rewards: reward_list_discounted})
+                _, s,loss_val = sess.run([train_op,merged_summary,loss],feed_dict={input_x : observations_input,actions: py_labels,rewards: reward_list_discounted})
                 print ('episode number :- ', episode_number)
                 print ('loss    ', loss_val)
-                #print 'grads:-', sess.run(grads_and_vars,feed_dict={input_x : observations_input,actions: py_labels,rewards: reward_list_discounted})
                                 
                 writer.add_summary(s,global_step=episode_number)
                 writer.flush()

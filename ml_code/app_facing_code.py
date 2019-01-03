@@ -4,6 +4,7 @@ from PIL import Image
 import numpy as np
 import io
 import os
+from appium_helper import AppiumHelper
 #from appium import webdriver
 
 
@@ -28,29 +29,19 @@ class AppFacing:
         self.size = self.driver.get_window_size()
         self.driver.maximize_window()      
         #self.driver.set_window_size(2400,1792, self.driver.window_handles[0])
-
        elif device_type=='mobile':
-        device_id = os.environ.get('ADB_DEVICE_ARGS')
-        
-        if device_id is None:
-            raise ValueError('Please set ADB_DEVICE_ARGS environment variable')
-            
-        capabilities = {
-            'platformName': 'Android',
-            'udid': device_id,
-            'browserName': 'chrome',
-            'deviceName': 'MyDevice'
-        }
+        capabilities = AppiumHelper.get_device_capabilities()
         url = 'http://localhost:4723/wd/hub'
         self.driver = webdriver.Remote(url, capabilities)
-       
-       #self.app = "https://www.bbc.co.uk/sport/41527965"
+
+        #self.app = "https://www.bbc.co.uk/sport/41527965"
        #self.driver.get(self.app)
        #self.current_page_url = self.driver.current_url
 
+
     def get_observation_size(self):
         return self.width, self.height
-        
+
     def take_current_page_screenshot(self):
         png = self.driver.get_screenshot_as_png()
         img = Image.open(io.BytesIO(png)).convert('1')
