@@ -5,3 +5,4 @@ scikit-learn>=0.19
 Pillow==3.4.2
 Appium-Python-Client
 scikit-image
+opencv-python

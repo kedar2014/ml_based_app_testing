@@ -13,6 +13,8 @@ from skimage import util
 from PIL import Image
 from io import BytesIO
 from skimage.color import rgb2gray
+import traceback
+import cv2
 
 
 class Utilities:
@@ -125,29 +127,35 @@ class Utilities:
     def bytes_list_feature(self,value):
         return tf.train.Feature(bytes_list=tf.train.BytesList(value=value))
 
-    def create_tf_example_object_detection(self, width, height, image_path, image, class_name, class_id):
-        
-        imgByteArr = io.BytesIO()
-        image.save(imgByteArr, format='PNG')
-        imgByteArr = imgByteArr.getvalue()
-        #imgByteArr = image.tobytes
+    def create_tf_example_object_detection(self,image,x1,y1,x2,y2,width, height, class_name, class_id):
+        try:
 
-        features_dict = {
-                    'image/height': self.int64_feature(height),
-                    'image/width': self.int64_feature(width),
-                    #'image/filename':self.bytes_feature('try.png'),
-                    #'image/source_id':self.bytes_feature('try.png'),
-                    'image/encoded': self.bytes_feature(imgByteArr),
-                    'image/format': self.bytes_feature(b'png'),
-                    'image/object/bbox/xmin': self.float_list_feature([0.0]),
-                    'image/object/bbox/ymin': self.float_list_feature([0.0]),
-                    'image/object/bbox/xmax': self.float_list_feature([1.0]),
-                    'image/object/bbox/ymax': self.float_list_feature([1.0]),
-                    'image/object/class/text': self.bytes_list_feature([class_name.encode('utf8')]),
-                    'image/object/class/label': self.int64_list_feature([class_id]),
+            encoded_image_string = cv2.imencode('.png', image)[1].tostring()
 
-                    }
-        example = tf.train.Example(features=tf.train.Features(feature=features_dict))    
+            xmins = [x1 / width]
+            xmaxs = [(x2) / width]
+            ymins = [y1 / height]
+            ymaxs = [(y2) / height]
+            
+            if ((xmins[0] > 1.1) or (xmaxs[0] > 1.1) or (ymins[0] > 1.1) or (ymaxs[0] > 1.1)):
+              print(xmins,ymins,xmaxs,ymaxs)
+
+            features_dict = {
+                        'image/height': self.int64_feature(height),
+                        'image/width': self.int64_feature(width),
+                        'image/encoded': self.bytes_feature(encoded_image_string),
+                        'image/format': self.bytes_feature('png'.encode('utf8')),
+                        'image/object/bbox/xmin': self.float_list_feature(xmins),
+                        'image/object/bbox/ymin': self.float_list_feature(ymins),
+                        'image/object/bbox/xmax': self.float_list_feature(xmaxs),
+                        'image/object/bbox/ymax': self.float_list_feature(ymaxs),
+                        'image/object/class/text': self.bytes_list_feature([class_name.encode('utf8')]),
+                        'image/object/class/label': self.int64_list_feature([class_id]),
+
+                        }
+            example = tf.train.Example(features=tf.train.Features(feature=features_dict))
+        except Exception:
+            traceback.print_exc()        
         return example
 
     def add_class_to_label_map(self, class_name, class_map):
@@ -179,34 +187,39 @@ class Utilities:
     def create_augmented_images(self,elements_list,creation_count):
         train_list = []
         test_list = []
-        for element_path in elements_list:
-            if random.randint(0,1) == 1:
-                train_list.append(element_path)
+        for element in elements_list:
+            
+            if np.random.choice(np.arange(0, 2), p=[0.2, 0.8]) == 1:
+                train_list.append(element)
+                print('train')
             else:
-                test_list.append(element_path)   
+                test_list.append(element) 
+                print('test')  
 
-            img_original = imread(element_path[0])
+            img_original = np.asarray(element[0])
             for i in range(creation_count):
                 
-                img =  self.random_rotation(img_original) if random.randint(0, 1) == 1 else img_original
-                img =  self.random_noise(img) if random.randint(0, 1) == 1 else img
-                img =  self.greyscale(img) if random.randint(0, 1) == 1 else img
+                #img =  self.random_rotation(img_original) if random.randint(0, 1) == 1 else img_original
+                img =  self.random_noise(img_original) if random.randint(0, 1) == 1 else img_original
+                #img =  self.greyscale(img) if random.randint(0, 1) == 1 else img
 
-                image_path = element_path[0] + str(i)
-                image_path = image_path.replace(".png","")
-                image_path = image_path + ".png"
+                #image_path = element[0] + str(i)
+                #image_path = image_path.replace(".png","")
+                #image_path = image_path + ".png"
                 
-                if random.randint(0,1) == 1:
-                    train_list.append([image_path,element_path[1],element_path[2],element_path[3],element_path[4]])
+                if np.random.choice(np.arange(0, 2), p=[0.2, 0.8]) == 1:
+                    train_list.append([img,element[1],element[2],element[3],element[4],element[5],element[6],element[7],element[8]])
+                    #print('train')
                 else:
-                    image_path = image_path.replace("train","test")
-                    test_list.append([image_path,element_path[1],element_path[2],element_path[3],element_path[4]])    
-                imsave(image_path, img)
+                    #image_path = image_path.replace("train","test")
+                    test_list.append([img,element[1],element[2],element[3],element[4],element[5],element[6],element[7],element[8]])  
+                    print('test')  
+                #imsave(image_path, img)
         return  train_list,test_list          
 
    
     def random_rotation(self,image_array: ndarray):
-        random_degree = random.uniform(-25, 25)
+        random_degree = random.uniform(-5, 5)
         return sk.transform.rotate(image_array, random_degree)
 
     def random_noise(self,image_array: ndarray):
